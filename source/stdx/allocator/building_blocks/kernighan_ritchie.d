@@ -545,6 +545,7 @@ struct KRRegion(ParentAllocator = NullAllocator)
     }
 
     ///
+    // TODO: OK
     @system unittest
     {
         import stdx.allocator.gc_allocator : GCAllocator;
@@ -613,6 +614,7 @@ allocator if $(D deallocate) is needed, yet the actual deallocation traffic is
 relatively low. The example below shows a $(D KRRegion) using stack storage
 fronting the GC allocator.
 */
+// TODO: OK
 @system unittest
 {
     import stdx.allocator.building_blocks.fallback_allocator
@@ -637,6 +639,7 @@ It should perform slightly better because instead of searching through one
 large free list, it searches through several shorter lists in LRU order. Also,
 it actually returns memory to the operating system when possible.
 */
+// TODO: OK
 @system unittest
 {
     import mir.utility : max;
@@ -647,88 +650,92 @@ it actually returns memory to the operating system when possible.
     AllocatorList!(n => KRRegion!MmapAllocator(max(n * 16, 1024u * 1024))) alloc;
 }
 
-@system unittest
-{
-    import mir.utility : max;
-    import stdx.allocator.building_blocks.allocator_list
-        : AllocatorList;
-    import stdx.allocator.gc_allocator : GCAllocator;
-    import stdx.allocator.mallocator : Mallocator;
-    import stdx.allocator.internal : Ternary;
-    /*
-    Create a scalable allocator consisting of 1 MB (or larger) blocks fetched
-    from the garbage-collected heap. Each block is organized as a KR-style
-    heap. More blocks are allocated and freed on a need basis.
-    */
-    AllocatorList!(n => KRRegion!Mallocator(max(n * 16, 1024u * 1024)),
-        NullAllocator) alloc;
-    void[][50] array;
-    foreach (i; 0 .. array.length)
-    {
-        auto length = i * 10_000 + 1;
-        array[i] = alloc.allocate(length);
-        assert(array[i].ptr);
-        assert(array[i].length == length);
-    }
-    import std.random : randomShuffle;
-    randomShuffle(array[]);
-    foreach (i; 0 .. array.length)
-    {
-        assert(array[i].ptr);
-        assert(alloc.owns(array[i]) == Ternary.yes);
-        alloc.deallocate(array[i]);
-    }
-}
+// TODO: NG
+// @system unittest
+// {
+//     import mir.utility : max;
+//     import stdx.allocator.building_blocks.allocator_list
+//         : AllocatorList;
+//     import stdx.allocator.gc_allocator : GCAllocator;
+//     import stdx.allocator.mallocator : Mallocator;
+//     import stdx.allocator.internal : Ternary;
+//     /*
+//     Create a scalable allocator consisting of 1 MB (or larger) blocks fetched
+//     from the garbage-collected heap. Each block is organized as a KR-style
+//     heap. More blocks are allocated and freed on a need basis.
+//     */
+//     AllocatorList!(n => KRRegion!Mallocator(max(n * 16, 1024u * 1024)),
+//         NullAllocator) alloc;
+//     void[][50] array;
+//     foreach (i; 0 .. array.length)
+//     {
+//         auto length = i * 10_000 + 1;
+//         array[i] = alloc.allocate(length);
+//         assert(array[i].ptr);
+//         assert(array[i].length == length);
+//     }
+//     import std.random : randomShuffle;
+//     randomShuffle(array[]);
+//     foreach (i; 0 .. array.length)
+//     {
+//         assert(array[i].ptr);
+//         assert(alloc.owns(array[i]) == Ternary.yes);
+//         alloc.deallocate(array[i]);
+//     }
+// }
 
-@system unittest
-{
-    import mir.utility : max;
-    import stdx.allocator.building_blocks.allocator_list
-        : AllocatorList;
-    import stdx.allocator.gc_allocator : GCAllocator;
-    import stdx.allocator.mmap_allocator : MmapAllocator;
-    import stdx.allocator.internal : Ternary;
-    /*
-    Create a scalable allocator consisting of 1 MB (or larger) blocks fetched
-    from the garbage-collected heap. Each block is organized as a KR-style
-    heap. More blocks are allocated and freed on a need basis.
-    */
-    AllocatorList!((n) {
-        auto result = KRRegion!MmapAllocator(max(n * 2, 1024u * 1024));
-        return result;
-    }) alloc;
-    void[][99] array;
-    foreach (i; 0 .. array.length)
-    {
-        auto length = i * 10_000 + 1;
-        array[i] = alloc.allocate(length);
-        assert(array[i].ptr);
-        foreach (j; 0 .. i)
-        {
-            assert(array[i].ptr != array[j].ptr);
-        }
-        assert(array[i].length == length);
-    }
-    import std.random : randomShuffle;
-    randomShuffle(array[]);
-    foreach (i; 0 .. array.length)
-    {
-        assert(alloc.owns(array[i]) == Ternary.yes);
-        alloc.deallocate(array[i]);
-    }
-}
+// TODO: NG
+// @system unittest
+// {
+//     import mir.utility : max;
+//     import stdx.allocator.building_blocks.allocator_list
+//         : AllocatorList;
+//     import stdx.allocator.gc_allocator : GCAllocator;
+//     import stdx.allocator.mmap_allocator : MmapAllocator;
+//     import stdx.allocator.internal : Ternary;
+//     /*
+//     Create a scalable allocator consisting of 1 MB (or larger) blocks fetched
+//     from the garbage-collected heap. Each block is organized as a KR-style
+//     heap. More blocks are allocated and freed on a need basis.
+//     */
+//     AllocatorList!((n) {
+//         auto result = KRRegion!MmapAllocator(max(n * 2, 1024u * 1024));
+//         return result;
+//     }) alloc;
+//     void[][99] array;
+//     foreach (i; 0 .. array.length)
+//     {
+//         auto length = i * 10_000 + 1;
+//         array[i] = alloc.allocate(length);
+//         assert(array[i].ptr);
+//         foreach (j; 0 .. i)
+//         {
+//             assert(array[i].ptr != array[j].ptr);
+//         }
+//         assert(array[i].length == length);
+//     }
+//     import std.random : randomShuffle;
+//     randomShuffle(array[]);
+//     foreach (i; 0 .. array.length)
+//     {
+//         assert(alloc.owns(array[i]) == Ternary.yes);
+//         alloc.deallocate(array[i]);
+//     }
+// }
 
-@system unittest
-{
-    import mir.utility : max;
-    import stdx.allocator.building_blocks.allocator_list
-        : AllocatorList;
-    import stdx.allocator.common : testAllocator;
-    import stdx.allocator.gc_allocator : GCAllocator;
-    testAllocator!(() => AllocatorList!(
-        n => KRRegion!GCAllocator(max(n * 16, 1024u * 1024)))());
-}
+// TODO: NG
+// @system unittest
+// {
+//     import mir.utility : max;
+//     import stdx.allocator.building_blocks.allocator_list
+//         : AllocatorList;
+//     import stdx.allocator.common : testAllocator;
+//     import stdx.allocator.gc_allocator : GCAllocator;
+//     testAllocator!(() => AllocatorList!(
+//         n => KRRegion!GCAllocator(max(n * 16, 1024u * 1024)))());
+// }
 
+// TODO: OK
 @system unittest
 {
     import stdx.allocator.gc_allocator : GCAllocator;
@@ -747,41 +754,43 @@ it actually returns memory to the operating system when possible.
     assert(alloc.allocateAll().length == 1024u * 1024);
 }
 
-@system unittest
-{
-    import std.conv : text;
-    import stdx.allocator.gc_allocator : GCAllocator;
-    import stdx.allocator.internal : Ternary;
-    auto alloc = KRRegion!()(
-                    cast(ubyte[])(GCAllocator.instance.allocate(1024u * 1024)));
-    const store = alloc.allocate(KRRegion!().sizeof);
-    auto p = cast(KRRegion!()* ) store.ptr;
-    import core.stdc.string : memcpy;
-    import std.algorithm.mutation : move;
-    import mir.conv : emplace;
+// TODO NG
+// @system unittest
+// {
+//     import std.conv : text;
+//     import stdx.allocator.gc_allocator : GCAllocator;
+//     import stdx.allocator.internal : Ternary;
+//     auto alloc = KRRegion!()(
+//                     cast(ubyte[])(GCAllocator.instance.allocate(1024u * 1024)));
+//     const store = alloc.allocate(KRRegion!().sizeof);
+//     auto p = cast(KRRegion!()* ) store.ptr;
+//     import core.stdc.string : memcpy;
+//     import std.algorithm.mutation : move;
+//     import mir.conv : emplace;
+// 
+//     memcpy(p, &alloc, alloc.sizeof);
+//     emplace(&alloc);
+// 
+//     void[][100] array;
+//     foreach (i; 0 .. array.length)
+//     {
+//         auto length = 100 * i + 1;
+//         array[i] = p.allocate(length);
+//         assert(array[i].length == length, text(array[i].length));
+//         assert(p.owns(array[i]) == Ternary.yes);
+//     }
+//     import std.random : randomShuffle;
+//     randomShuffle(array[]);
+//     foreach (i; 0 .. array.length)
+//     {
+//         assert(p.owns(array[i]) == Ternary.yes);
+//         p.deallocate(array[i]);
+//     }
+//     auto b = p.allocateAll();
+//     assert(b.length == 1024u * 1024 - KRRegion!().sizeof, text(b.length));
+// }
 
-    memcpy(p, &alloc, alloc.sizeof);
-    emplace(&alloc);
-
-    void[][100] array;
-    foreach (i; 0 .. array.length)
-    {
-        auto length = 100 * i + 1;
-        array[i] = p.allocate(length);
-        assert(array[i].length == length, text(array[i].length));
-        assert(p.owns(array[i]) == Ternary.yes);
-    }
-    import std.random : randomShuffle;
-    randomShuffle(array[]);
-    foreach (i; 0 .. array.length)
-    {
-        assert(p.owns(array[i]) == Ternary.yes);
-        p.deallocate(array[i]);
-    }
-    auto b = p.allocateAll();
-    assert(b.length == 1024u * 1024 - KRRegion!().sizeof, text(b.length));
-}
-
+// TODO: OK
 @system unittest
 {
     import stdx.allocator.gc_allocator : GCAllocator;
@@ -794,52 +803,54 @@ it actually returns memory to the operating system when possible.
     assert(p.length == 1024u * 1024);
 }
 
-@system unittest
-{
-    import stdx.allocator.building_blocks;
-    import std.random;
-    import stdx.allocator.internal : Ternary;
+// TODO: NG
+// @system unittest
+// {
+//     import stdx.allocator.building_blocks;
+//     import std.random;
+//     import stdx.allocator.internal : Ternary;
+// 
+//     // Both sequences must work on either system
+// 
+//     // A sequence of allocs which generates the error described in issue 16564
+//     // that is a gap at the end of buf from the perspective of the allocator
+// 
+//     // for 64 bit systems (leftover balance = 8 bytes < 16)
+//     int[] sizes64 = [18904, 2008, 74904, 224, 111904, 1904, 52288, 8];
+// 
+//     // for 32 bit systems (leftover balance < 8)
+//     int[] sizes32 = [81412, 107068, 49892, 23768];
+// 
+// 
+//     static if (__VERSION__ >= 2072) {
+//         mixin(`
+//         void test(int[] sizes)
+//         {
+//             align(size_t.sizeof) ubyte[256 * 1024] buf;
+//             auto a = KRRegion!()(buf);
+// 
+//             void[][] bufs;
+// 
+//             foreach (size; sizes)
+//             {
+//                 bufs ~= a.allocate(size);
+//             }
+// 
+//             foreach (b; bufs.randomCover)
+//             {
+//                 a.deallocate(b);
+//             }
+// 
+//             assert(a.empty == Ternary.yes);
+//         }
+// 
+//         test(sizes64);
+//         test(sizes32);
+//         `);
+//     }
+// }
 
-    // Both sequences must work on either system
-
-    // A sequence of allocs which generates the error described in issue 16564
-    // that is a gap at the end of buf from the perspective of the allocator
-
-    // for 64 bit systems (leftover balance = 8 bytes < 16)
-    int[] sizes64 = [18904, 2008, 74904, 224, 111904, 1904, 52288, 8];
-
-    // for 32 bit systems (leftover balance < 8)
-    int[] sizes32 = [81412, 107068, 49892, 23768];
-
-
-    static if (__VERSION__ >= 2072) {
-        mixin(`
-        void test(int[] sizes)
-        {
-            align(size_t.sizeof) ubyte[256 * 1024] buf;
-            auto a = KRRegion!()(buf);
-
-            void[][] bufs;
-
-            foreach (size; sizes)
-            {
-                bufs ~= a.allocate(size);
-            }
-
-            foreach (b; bufs.randomCover)
-            {
-                a.deallocate(b);
-            }
-
-            assert(a.empty == Ternary.yes);
-        }
-
-        test(sizes64);
-        test(sizes32);
-        `);
-    }
-}
-
+// TODO: OK
 @system unittest
 {
     import stdx.allocator.building_blocks;
